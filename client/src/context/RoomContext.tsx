@@ -1,4 +1,5 @@
 import React, { createContext, ReactNode, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import socketIOClient, { Socket } from "socket.io-client";
 
 const WS = "http://localhost:8080";
@@ -14,13 +15,18 @@ interface RoomProviderProps {
   children: ReactNode;
 }
 
-export const RoomProvider: React.FunctionComponent<RoomProviderProps> = ({ children }) => {
-  const enterRoom = ({roomId}:{roomId: "string"}) => {
+export const RoomProvider: React.FunctionComponent<RoomProviderProps> = ({
+  children,
+}) => {
+  const navigate = useNavigate();
+
+  const enterRoom = ({ roomId }: { roomId: "string" }) => {
     console.log(roomId);
-  }
-  useEffect(()=>{
-    ws.on("room-created", enterRoom)
-  }, [])
-  
+    navigate(`/room/${roomId}`);
+  };
+  useEffect(() => {
+    ws.on("room-created", enterRoom);
+  }, []);
+
   return <RoomContext.Provider value={ws}>{children}</RoomContext.Provider>;
 };
