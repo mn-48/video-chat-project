@@ -1,13 +1,18 @@
-import React, { createContext, ReactNode, useEffect } from "react";
+import Peer from "peerjs";
+import React, { createContext, ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import socketIOClient, { Socket } from "socket.io-client";
+import { v4 as uuidV4 } from "uuid";
 
 const WS = "http://localhost:8080";
 
 // Define the type for the context value
-type RoomContextType = Socket | null;
+interface RoomContextType {
+  ws: Socket | null;
+  me: Peer | null;
+}
 
-export const RoomContext = createContext<RoomContextType>(null);
+export const RoomContext = createContext<RoomContextType>({ ws: null, me: null });
 
 const ws = socketIOClient(WS);
 
@@ -15,18 +20,30 @@ interface RoomProviderProps {
   children: ReactNode;
 }
 
-export const RoomProvider: React.FunctionComponent<RoomProviderProps> = ({
-  children,
-}) => {
+export const RoomProvider: React.FunctionComponent<RoomProviderProps> = ({ children }) => {
   const navigate = useNavigate();
+  const [me, setMe] = useState<Peer | null>(null);
 
-  const enterRoom = ({ roomId }: { roomId: "string" }) => {
+  const enterRoom = ({ roomId }: { roomId: string }) => {
     console.log(roomId);
     navigate(`/room/${roomId}`);
   };
+
   useEffect(() => {
+    const meId = uuidV4();
+    const peer = new Peer(meId);
+    setMe(peer);
     ws.on("room-created", enterRoom);
+
+    // Cleanup function to remove the event listener when the component unmounts
+    return () => {
+      ws.off("room-created", enterRoom);
+    };
   }, []);
 
-  return <RoomContext.Provider value={ws}>{children}</RoomContext.Provider>;
+  return (
+    <RoomContext.Provider value={{ ws, me }}>
+      {children}
+    </RoomContext.Provider>
+  );
 };

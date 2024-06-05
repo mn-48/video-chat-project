@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { RoomContext } from '../context/RoomContext';
 
 const Room: React.FC = () => {
-  const ws = useContext(RoomContext);
+  const {ws }= useContext(RoomContext);
   const { id } = useParams<{ id: string }>();
 
   useEffect(() => {

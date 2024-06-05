@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { RoomContext } from "../context/RoomContext";
 
 const Join: React.FC = () => {
-  const ws = useContext(RoomContext);
+  const {ws} = useContext(RoomContext);
 
   const joinRoom = () => {
     console.log("joinRoom clicked");

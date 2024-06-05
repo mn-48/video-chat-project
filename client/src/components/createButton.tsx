@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { RoomContext } from "../context/RoomContext";
 
 const Create: React.FC = () => {
-  const ws = useContext(RoomContext);
+  const {ws, me} = useContext(RoomContext);
 
   const createRoom = () => {
     console.log("createRoom clicked");

@@ -1,17 +1,27 @@
 import { Socket } from "socket.io";
 import { v4 as uuid4 } from "uuid";
 
+const rooms: Record<string, string[]> = {};
+
+interface IRoomParams {
+  roomId: "string";
+  peerId: "string";
+}
+
 export const roomHandeler = (socket: Socket) => {
   const createRoom = () => {
     const roomId = uuid4();
     socket.join(roomId);
+
+    rooms[roomId] = [];
+
     socket.emit("room-created", { roomId });
 
     console.log("user created the room");
   };
 
-  const joinRoom = ({roomId}: {roomId: "string"}) => {
-    console.log("user is joined the room.", roomId);
+  const joinRoom = ({ roomId, peerId }: IRoomParams) => {
+    console.log("user is joined the room.", roomId, peerId);
   };
 
   socket.on("create-room", createRoom);
