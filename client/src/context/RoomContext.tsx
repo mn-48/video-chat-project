@@ -1,8 +1,10 @@
 import Peer from "peerjs";
-import React, { createContext, ReactNode, useEffect, useState } from "react";
+import React, { createContext, ReactNode, useEffect, useState, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
 import socketIOClient, { Socket } from "socket.io-client";
 import { v4 as uuidV4 } from "uuid";
+import { peersReducer } from "./peerReducer";
+import { addPeerAction } from "./peersActions";
 
 const WS = "http://localhost:8080";
 
@@ -21,6 +23,9 @@ export const RoomProvider: React.FunctionComponent<RoomProviderProps> = ({ child
   const navigate = useNavigate();
   const [me, setMe] = useState<Peer | null>(null);
   const [stream, setStream] = useState< MediaStream | null>()
+  const [peers, dispatch] = useReducer(peersReducer, {})
+
+
 
   const enterRoom = ({ roomId }: { roomId: string }) => {
     console.log(roomId);
@@ -69,19 +74,32 @@ export const RoomProvider: React.FunctionComponent<RoomProviderProps> = ({ child
 
       const call = me.call(peerId, stream);
 
+      call.on("stream", (peerStream) => {
+        dispatch(addPeerAction(peerId, peerStream))
+      })
+
     });
 
     me.on("call", (call)=>{
 
       call.answer(stream);
+      call.on("stream", (peerStream) => {
+        dispatch(addPeerAction(call.peer, peerStream))
+      })
 
     })
 
     
   }, [me, stream])
 
+
+  console.log("Peers: ",peers);
+
+
+
+
   return (
-    <RoomContext.Provider value={{ ws, me, stream }}>
+    <RoomContext.Provider value={{ ws, me, stream, peers }}>
       {children}
     </RoomContext.Provider>
   );
