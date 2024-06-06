@@ -22,6 +22,9 @@ export const roomHandeler = (socket: Socket) => {
 
   const joinRoom = ({ roomId, peerId }: IRoomParams) => {
     console.log("user is joined the room.", roomId, peerId);
+    rooms[roomId].push(peerId);
+    socket.join(roomId);
+    socket.emit("get-users", { roomId, participants: rooms[roomId] });
   };
 
   socket.on("create-room", createRoom);

@@ -28,12 +28,17 @@ export const RoomProvider: React.FunctionComponent<RoomProviderProps> = ({ child
     console.log(roomId);
     navigate(`/room/${roomId}`);
   };
+  const getUsers = ({ participants }: { participants: string[] }) => {
+    console.log(participants);
+    
+  };
 
   useEffect(() => {
     const meId = uuidV4();
     const peer = new Peer(meId);
     setMe(peer);
     ws.on("room-created", enterRoom);
+    ws.on("get-users", getUsers);
 
     // Cleanup function to remove the event listener when the component unmounts
     return () => {
