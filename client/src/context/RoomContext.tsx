@@ -50,6 +50,7 @@ export const RoomProvider: React.FunctionComponent<RoomProviderProps> = ({ child
 
     ws.on("room-created", enterRoom);
     ws.on("get-users", getUsers);
+
     
 
     // Cleanup function to remove the event listener when the component unmounts
@@ -57,6 +58,27 @@ export const RoomProvider: React.FunctionComponent<RoomProviderProps> = ({ child
       ws.off("room-created", enterRoom);
     };
   }, []);
+
+
+  useEffect(() => {
+
+    if (!me) return;
+    if (!stream) return;
+
+    ws.on("user-joined", (peerId) => {
+
+      const call = me.call(peerId, stream);
+
+    });
+
+    me.on("call", (call)=>{
+
+      call.answer(stream);
+
+    })
+
+    
+  }, [me, stream])
 
   return (
     <RoomContext.Provider value={{ ws, me, stream }}>
