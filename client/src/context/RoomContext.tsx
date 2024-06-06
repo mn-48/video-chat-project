@@ -7,12 +7,9 @@ import { v4 as uuidV4 } from "uuid";
 const WS = "http://localhost:8080";
 
 // Define the type for the context value
-interface RoomContextType {
-  ws: Socket | null;
-  me: Peer | null;
-}
 
-export const RoomContext = createContext<RoomContextType>({ ws: null, me: null });
+export const RoomContext = createContext<null | any>(null);
+
 
 const ws = socketIOClient(WS);
 
@@ -23,6 +20,7 @@ interface RoomProviderProps {
 export const RoomProvider: React.FunctionComponent<RoomProviderProps> = ({ children }) => {
   const navigate = useNavigate();
   const [me, setMe] = useState<Peer | null>(null);
+  const [stream, setStream] = useState< MediaStream | null>()
 
   const enterRoom = ({ roomId }: { roomId: string }) => {
     console.log(roomId);
@@ -37,8 +35,22 @@ export const RoomProvider: React.FunctionComponent<RoomProviderProps> = ({ child
     const meId = uuidV4();
     const peer = new Peer(meId);
     setMe(peer);
+
+
+    try{
+      navigator.mediaDevices.getUserMedia({video: true, audio: true}).then((stream) =>  {
+        setStream(stream);
+      })
+
+
+    }catch(error){
+        console.error(error);
+
+    }
+
     ws.on("room-created", enterRoom);
     ws.on("get-users", getUsers);
+    
 
     // Cleanup function to remove the event listener when the component unmounts
     return () => {
@@ -47,7 +59,7 @@ export const RoomProvider: React.FunctionComponent<RoomProviderProps> = ({ child
   }, []);
 
   return (
-    <RoomContext.Provider value={{ ws, me }}>
+    <RoomContext.Provider value={{ ws, me, stream }}>
       {children}
     </RoomContext.Provider>
   );

@@ -18,6 +18,7 @@ const Create: React.FC = () => {
         className="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 border border-rose-700 rounded"
       >
         Start new meeting
+        
       </button>
     </div>
   );
